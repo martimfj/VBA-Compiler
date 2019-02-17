@@ -9,12 +9,12 @@ A representação intermediária é a representação de um programa entre o có
 
 ### 2. Quais são as principais vantages e desvantages entre Linguagem de Máquina e Representação Intermediária?
 
-| Representação Intermediária | Linguagem de Máquina           |   |   |   |
-|-----------------------------|--------------------------------|---|---|---|
-| Multiplataforma             | Performance                    |   |   |   |
-| Debugging (sem print)       | Tamanho                        |   |   |   |
-| Language Interoperability   | Consegue fazer cross compiling |   |   |   |
-| Precisa de runtime          |                                |   |   |   |
+| Representação Intermediária | Linguagem de Máquina           |
+|-----------------------------|--------------------------------|
+| Multiplataforma             | Performance                    |
+| Debugging (sem print)       | Tamanho                        |
+| Language Interoperability   | Consegue fazer cross compiling |
+| Precisa de runtime          |                                |
 
 
 ## Compilador
