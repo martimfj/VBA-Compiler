@@ -1,5 +1,5 @@
 __author__ = "Martim Ferreira José"
-__version__ = "1.1"
+__version__ = "1.0.1"
 __license__ = "MIT"
 
 class Token:
