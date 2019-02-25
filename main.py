@@ -1,3 +1,7 @@
+__author__ = "Martim Ferreira José"
+__version__ = "1.1"
+__license__ = "MIT"
+
 class Token:
     def __init__(self, token_type, value):
         self.type = token_type
