@@ -2,10 +2,10 @@ import unittest
 from main import Parser
 
 __author__ = "Martim Ferreira José"
-__version__ = "1.0.1"
+__version__ = "1.1.1"
 __license__ = "MIT"
 
-class LearningCase(unittest.TestCase):
+class TestCase(unittest.TestCase):
     def test_plus(self):
         self.assertEqual(Parser.run("1+2"), 3)
 
