@@ -2,6 +2,9 @@ __author__ = "Martim Ferreira José"
 __version__ = "1.1.1"
 __license__ = "MIT"
 
+import re
+
+
 class Token:
     def __init__(self, token_type, value):
         self.type = token_type
@@ -45,7 +48,7 @@ class Tokenizer:
             self.actual = Token("INT", int(int_token))
         
         else:
-            raise ValueError("Token {} inválido".format(self.code[self.position]))
+            raise ValueError("Token {} inválido".format(repr(self.code[self.position])))
 
 class Parser:
 
@@ -101,9 +104,15 @@ class Parser:
             raise ValueError("Erro sintático. Último token não é o EOP.")
         return res
 
+class PrePro:
+    @staticmethod
+    def filtra(code):
+        return re.sub("'.*\n", " ", code)
+
 def main():
-    code = input()
-    print(Parser.run(code))
+    code = input() + "\n"
+    processed_code = PrePro.filtra(code)
+    print(Parser.run(processed_code.rstrip()))
 
 if __name__ == "__main__":
     main()
