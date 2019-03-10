@@ -21,7 +21,7 @@ class Tokenizer:
             self.actual = Token("EOF", "EOF")
             return
 
-        while self.code[self.position] == " " and self.position < len(self.code):
+        while self.code[self.position] == " ":
             self.position += 1
 
         if self.code[self.position] == "-":
@@ -62,7 +62,6 @@ class Parser:
 
             elif Parser.tokens.actual.type == "MINUS":
                 output -= Parser.parseTerm()
-            Parser.tokens.selectNext()
         return output
 
     @staticmethod
@@ -96,7 +95,7 @@ class Parser:
         
     @staticmethod
     def run(code):
-        Parser.tokens = Tokenizer(code)
+        Parser.tokens = Tokenizer(PrePro.filtra(code + "\n").rstrip())
         res = Parser.parseExpression()
         Parser.tokens.selectNext()
 
@@ -110,9 +109,8 @@ class PrePro:
         return re.sub("'.*\n", " ", code)
 
 def main():
-    code = input() + "\n"
-    processed_code = PrePro.filtra(code)
-    print(Parser.run(processed_code.rstrip()))
+    code = input()
+    print(Parser.run(code))
 
 if __name__ == "__main__":
     main()

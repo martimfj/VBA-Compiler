@@ -21,6 +21,20 @@ class LearningCase(unittest.TestCase):
     def test_3digit_numbers_wspace(self):
         self.assertEqual(Parser.run("789  +345 -  123"), 1011)
 
+    def test_comments_start(self):
+        with self.assertRaises(ValueError):
+            Parser.run("' bla 1 ' bla")
+
+    def test_divide_first(self):
+        self.assertEqual(Parser.run("4/2+3"), 5)
+
+    def test_divide_last(self):
+        self.assertEqual(Parser.run("3+4/2"), 5)
+
+    def test_op_with_comments(self):
+        with self.assertRaises(ValueError):
+            Parser.run("2 + 3 * ' bla 5")
+
 def main():
     unittest.main()
 
