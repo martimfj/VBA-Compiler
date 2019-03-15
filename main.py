@@ -1,5 +1,5 @@
 __author__ = "Martim Ferreira José"
-__version__ = "1.1.1"
+__version__ = "1.2.1"
 __license__ = "MIT"
 
 import re
@@ -25,19 +25,27 @@ class Tokenizer:
             self.position += 1
 
         if self.code[self.position] == "-":
-            self.actual = Token("MINUS", "-")
+            self.actual = Token("UNARY_OP", "-")
             self.position += 1
 
         elif self.code[self.position] == "+":
-            self.actual = Token("PLUS", "+")
+            self.actual = Token("UNARY_OP", "+")
             self.position += 1
 
         elif self.code[self.position] == "/":
-            self.actual = Token("DIV", "/")
+            self.actual = Token("BINARY_OP", "/")
             self.position += 1
 
         elif self.code[self.position] == "*":
-            self.actual = Token("MULT", "*")
+            self.actual = Token("BINARY_OP", "*")
+            self.position += 1
+
+        elif self.code[self.position] == "(":
+            self.actual = Token("BRACKETS", "(")
+            self.position += 1
+
+        elif self.code[self.position] == ")":
+            self.actual = Token("BRACKETS", ")")
             self.position += 1
             
         elif self.code[self.position].isdigit():
@@ -56,43 +64,59 @@ class Parser:
     def parseExpression():
         output = Parser.parseTerm()
 
-        while Parser.tokens.actual.type == "PLUS" or Parser.tokens.actual.type == "MINUS":
-            if Parser.tokens.actual.type == "PLUS":
+        while Parser.tokens.actual.type == "UNARY_OP":
+            if Parser.tokens.actual.value == "+":
                 output += Parser.parseTerm()
 
-            elif Parser.tokens.actual.type == "MINUS":
+            elif Parser.tokens.actual.value == "-":
                 output -= Parser.parseTerm()
         return output
 
     @staticmethod
     def parseTerm():
-        output = 0
-        Parser.tokens.selectNext()
+        output = Parser.parseFactor()
 
+        while Parser.tokens.actual.type == "BINARY_OP":
+            if Parser.tokens.actual.value == "*":
+                output *= Parser.parseFactor()
+
+            elif Parser.tokens.actual.value == "/":
+                output //= Parser.parseFactor()
+        return output
+
+    @staticmethod
+    def parseFactor():
+        output = 0
+        
+        Parser.tokens.selectNext()
+        
         if Parser.tokens.actual.type == "INT":
             output += Parser.tokens.actual.value
             Parser.tokens.selectNext()
-            
-            while Parser.tokens.actual.type == "MULT" or Parser.tokens.actual.type == "DIV":
-                if Parser.tokens.actual.type == "MULT":
-                    Parser.tokens.selectNext()
-                    if Parser.tokens.actual.type == "INT":
-                        output *= Parser.tokens.actual.value
-                    else:
-                        raise ValueError("Um número é necessário após um operador")
-                        
-                elif Parser.tokens.actual.type == "DIV":
-                    Parser.tokens.selectNext()
-                    if Parser.tokens.actual.type == "INT":
-                        output //= Parser.tokens.actual.value
-                    else:
-                        raise ValueError("Um número é necessário após um operador")
-                Parser.tokens.selectNext()
-        else:
-            raise ValueError("A operação deve começar com um número")
 
+        elif Parser.tokens.actual.type == "BRACKETS":
+            if Parser.tokens.actual.value == "(":
+                output = Parser.parseExpression()
+                
+                if Parser.tokens.actual.value == ")":
+                    Parser.tokens.selectNext()
+                
+                else:
+                    raise ValueError("Não fechou parênteses")
+            else:
+                raise ValueError("Começou com parênteses errado")
+
+        elif Parser.tokens.actual.type == "UNARY_OP":
+            if Parser.tokens.actual.value == "+":
+                output += Parser.parseFactor()
+
+            elif Parser.tokens.actual.value == "-":
+                output -= Parser.parseFactor()
+
+        else:
+            raise ValueError("Após operador deve haver um número")
         return output
-        
+
     @staticmethod
     def run(code):
         Parser.tokens = Tokenizer(PrePro.filtra(code + "\n").rstrip())

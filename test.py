@@ -2,7 +2,7 @@ import unittest
 from main import Parser
 
 __author__ = "Martim Ferreira José"
-__version__ = "1.1.1"
+__version__ = "1.2.1"
 __license__ = "MIT"
 
 class TestCase(unittest.TestCase):
@@ -34,6 +34,22 @@ class TestCase(unittest.TestCase):
     def test_op_with_comments(self):
         with self.assertRaises(ValueError):
             Parser.run("2 + 3 * ' bla 5")
+
+    def test_par_sum_mult(self):
+        self.assertEqual(Parser.run("(3 + 2) /5"), 1)
+
+    def test_unary_ops(self):
+        self.assertEqual(Parser.run("+--++3"), 3)
+    
+    def test_unary_ops_with_div(self):
+        self.assertEqual(Parser.run("3 - -2/4"), 4)
+
+    def test_par_div_mult(self):
+        self.assertEqual(Parser.run("4/(1+1)*2"), 4)
+
+    def test_no_closing_par(self):
+        with self.assertRaises(ValueError):
+            Parser.run("(2*2")
 
 def main():
     unittest.main()
