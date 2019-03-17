@@ -1,5 +1,5 @@
 __author__ = "Martim Ferreira José"
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 __license__ = "MIT"
 
 import re
@@ -95,7 +95,7 @@ class Parser:
         
     @staticmethod
     def run(code):
-        Parser.tokens = Tokenizer(PrePro.filtra(code + "\n").rstrip())
+        Parser.tokens = Tokenizer(PrePro.filtra(code).rstrip())
         res = Parser.parseExpression()
         Parser.tokens.selectNext()
 
@@ -106,10 +106,10 @@ class Parser:
 class PrePro:
     @staticmethod
     def filtra(code):
-        return re.sub("'.*\n", " ", code)
+        return re.sub("'.*\n", "", code.replace("\\n", "\n"))
 
 def main():
-    code = input()
+    code = input() + "\n"
     print(Parser.run(code))
 
 if __name__ == "__main__":

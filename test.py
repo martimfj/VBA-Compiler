@@ -2,7 +2,7 @@ import unittest
 from main import Parser
 
 __author__ = "Martim Ferreira José"
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 __license__ = "MIT"
 
 class TestCase(unittest.TestCase):
@@ -31,9 +31,11 @@ class TestCase(unittest.TestCase):
     def test_divide_last(self):
         self.assertEqual(Parser.run("3+4/2"), 5)
 
-    def test_op_with_comments(self):
-        with self.assertRaises(ValueError):
-            Parser.run("2 + 3 * ' bla 5")
+    def test_op_with_init_comments(self):
+        self.assertEqual(Parser.run("' bla \n 1+1"), 2)
+    
+    def test_op_with_mid_comments(self):
+        self.assertEqual(Parser.run("2 + 3 * ' bla \n 5"), 17)
 
 def main():
     unittest.main()
