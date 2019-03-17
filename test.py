@@ -31,7 +31,13 @@ class TestCase(unittest.TestCase):
     def test_divide_last(self):
         self.assertEqual(Parser.run("3+4/2"), 5)
 
-    def test_op_with_comments(self):
+    def test_op_with_init_comments(self):
+        self.assertEqual(Parser.run("' bla \n 1+1"), 2)
+    
+    def test_op_with_mid_comments(self):
+        self.assertEqual(Parser.run("2 + 3 * ' bla \n 5"), 17)
+
+    def test_op_with_end_comments(self):
         with self.assertRaises(ValueError):
             Parser.run("2 + 3 * ' bla 5")
 
