@@ -48,14 +48,14 @@ class Tokenizer:
         elif self.code[self.position] == ")":
             self.actual = Token("BRACKETS", ")")
             self.position += 1
-            
+
         elif self.code[self.position].isdigit():
             int_token = ""
             while self.position < len(self.code) and self.code[self.position].isdigit():
                 int_token += str(self.code[self.position])
                 self.position += 1
             self.actual = Token("INT", int(int_token))
-        
+
         else:
             raise ValueError("Token {} inválido".format(repr(self.code[self.position])))
 
@@ -88,9 +88,9 @@ class Parser:
     @staticmethod
     def parseFactor():
         output = 0
-        
+
         Parser.tokens.selectNext()
-        
+
         if Parser.tokens.actual.type == "INT":
             output = IntVal(Parser.tokens.actual.value)
             Parser.tokens.selectNext()
@@ -101,7 +101,7 @@ class Parser:
                 
                 if Parser.tokens.actual.value == ")":
                     Parser.tokens.selectNext()
-                
+
                 else:
                     raise ValueError("Não fechou parênteses")
             else:
@@ -125,14 +125,15 @@ class Parser:
         if Parser.tokens.actual.value != "EOF":
             raise ValueError("Erro sintático. Último token não é o EOF.")
         return res.evaluate()
- 
+
 class PrePro:
     @staticmethod
     def filtra(code):
         return re.sub("'.*\n", "", code.replace("\\n", "\n"))
 
 def main():
-    code = input() + "\n"
+    with open ('test_file.vbs', 'r') as file:
+        code = file.read() + "\n"
     print(Parser.run(code))
 
 if __name__ == "__main__":
