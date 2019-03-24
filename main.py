@@ -1,8 +1,9 @@
 __author__ = "Martim Ferreira José"
-__version__ = "1.2.1"
+__version__ = "2.0.1"
 __license__ = "MIT"
 
 import re
+from node import *
 
 
 class Token:
@@ -66,10 +67,10 @@ class Parser:
 
         while Parser.tokens.actual.type == "UNARY_OP":
             if Parser.tokens.actual.value == "+":
-                output += Parser.parseTerm()
+                output = BinOp("+", [output, Parser.parseTerm()])
 
             elif Parser.tokens.actual.value == "-":
-                output -= Parser.parseTerm()
+                output = BinOp("-", [output, Parser.parseTerm()])
         return output
 
     @staticmethod
@@ -78,10 +79,10 @@ class Parser:
 
         while Parser.tokens.actual.type == "BINARY_OP":
             if Parser.tokens.actual.value == "*":
-                output *= Parser.parseFactor()
+                output = BinOp("*", [output, Parser.parseFactor()])
 
             elif Parser.tokens.actual.value == "/":
-                output //= Parser.parseFactor()
+                output = BinOp("/", [output, Parser.parseFactor()])
         return output
 
     @staticmethod
@@ -91,7 +92,7 @@ class Parser:
         Parser.tokens.selectNext()
         
         if Parser.tokens.actual.type == "INT":
-            output += Parser.tokens.actual.value
+            output = IntVal(Parser.tokens.actual.value)
             Parser.tokens.selectNext()
 
         elif Parser.tokens.actual.type == "BRACKETS":
@@ -108,10 +109,10 @@ class Parser:
 
         elif Parser.tokens.actual.type == "UNARY_OP":
             if Parser.tokens.actual.value == "+":
-                output += Parser.parseFactor()
+                output = UnOp("+", [Parser.parseFactor()])
 
             elif Parser.tokens.actual.value == "-":
-                output -= Parser.parseFactor()
+                output = UnOp("-", [Parser.parseFactor()])
 
         else:
             raise ValueError("Após operador deve haver um número")
@@ -125,8 +126,8 @@ class Parser:
 
         if Parser.tokens.actual.value != "EOF":
             raise ValueError("Erro sintático. Último token não é o EOP.")
-        return res
-
+        return res.evaluate()
+ 
 class PrePro:
     @staticmethod
     def filtra(code):
