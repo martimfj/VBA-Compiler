@@ -11,12 +11,11 @@ G = ({E, T, F, +, -, *, /, (, ), n}, {+, -, *, /, (, ), n}, P, E)
 
 - expressão = termo, { (“+” | “-”), termo } ;
 - termo = fator, { (“*” | “/”), fator } ;
-- fator = (“+” | “-”) fator, número, “(” expressão “)” ;
+- fator = (“+” | “-”) fator | número, “(” expressão “)” ;
 - número = “-2^63” | ... | “2^63” ;
 
-
 ## Como utilizar
-Para utilizar o compilador nesta fase inicial, rode o arquivo `main.py` e inpute uma expressão que a gramática suporte, como por exemplo: *(9-7)*3+(4+6)/5*
+Para utilizar o compilador nesta fase inicial, rode o arquivo `main.py`. Para alterar a equação que será executada, modifique o arquivo *test_file.vbs*.
 
 ## Testes
 Para relizar os testes do compilador, execute o arquivo `test.py`.
