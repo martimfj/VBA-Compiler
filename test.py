@@ -56,6 +56,9 @@ class TestCase(unittest.TestCase):
     def test_no_closing_par(self):
         with self.assertRaises(ValueError):
             Parser.run("(2*2")
+    def test_lost_par(self):
+        with self.assertRaises(ValueError):
+            Parser.run("2*2)")
 
 def main():
     unittest.main()

@@ -122,10 +122,8 @@ class Parser:
     def run(code):
         Parser.tokens = Tokenizer(PrePro.filtra(code).rstrip())
         res = Parser.parseExpression()
-        Parser.tokens.selectNext()
-
         if Parser.tokens.actual.value != "EOF":
-            raise ValueError("Erro sintático. Último token não é o EOP.")
+            raise ValueError("Erro sintático. Último token não é o EOF.")
         return res.evaluate()
  
 class PrePro:
