@@ -1,4 +1,4 @@
-_author__ = "Martim Ferreira José"
+__author__ = "Martim Ferreira José"
 __version__ = "2.0.1"
 __license__ = "MIT"
 
