@@ -1,5 +1,5 @@
 __author__ = "Martim Ferreira José"
-__version__ = "2.0.1"
+__version__ = "2.1.1"
 __license__ = "MIT"
 
 import re
@@ -49,17 +49,75 @@ class Tokenizer:
             self.actual = Token("BRACKETS", ")")
             self.position += 1
 
+        elif self.code[self.position] == "=":
+            self.actual = Token("ASSIGNMENT", "=")
+            self.position += 1
+
+        elif self.code[self.position] == "\n":
+            self.actual = Token("LINEFEED", "\n")
+            self.position += 1
+
         elif self.code[self.position].isdigit():
             int_token = ""
             while self.position < len(self.code) and self.code[self.position].isdigit():
                 int_token += str(self.code[self.position])
                 self.position += 1
             self.actual = Token("INT", int(int_token))
+        
+        elif self.code[self.position].isalpha():
+            identifier_token = ""
+            while self.position < len(self.code) and self.code[self.position].isidentifier():
+                identifier_token += str(self.code[self.position]).upper()
+                self.position += 1
+
+            reserved_words = ["PRINT", "BEGIN", "END"]
+            if identifier_token in reserved_words:
+                self.actual = Token(identifier_token, identifier_token)
+            else:
+                self.actual = Token("IDENTIFIER", identifier_token)
 
         else:
             raise ValueError("Token {} inválido".format(repr(self.code[self.position])))
 
+        print(Parser.tokens.actual.value)
+
 class Parser:
+    @staticmethod
+    def parseStatements():
+        if Parser.tokens.actual.type == "BEGIN":
+            Parser.tokens.selectNext()
+            if Parser.tokens.actual.type == "LINEFEED":
+                Parser.tokens.selectNext()
+                while Parser.tokens.actual.type != "END":
+                    Parser.parseStatement()
+                    if Parser.tokens.actual.type != "LINEFEED":
+                        raise ValueError("Não quebrou linha depois de um statement")
+            else:
+                raise ValueError("Não quebrou linha depois de BEGIN")
+        else:
+            raise ValueError("BEGIN inexistênte")
+
+    @staticmethod
+    def parseStatement():
+        if Parser.tokens.actual.type == "IDENTIFIER":
+            Parser.tokens.selectNext()
+            
+            if Parser.tokens.actual.type == "ASSIGNMENT":
+                Parser.tokens.selectNext()
+                Parser.parseExpression()
+            else:
+                raise ValueError("IDENTIFIER não designado")
+
+        elif Parser.tokens.actual.type == "PRINT":
+            Parser.tokens.selectNext()
+            Parser.parseExpression()
+
+        elif Parser.tokens.actual.type == "BEGIN":
+            Parser.parseStatements()
+
+        else:
+            pass
+            #NoOp
 
     @staticmethod
     def parseExpression():
