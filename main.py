@@ -77,7 +77,7 @@ class Tokenizer:
                 self.actual = Token("IDENTIFIER", identifier_token)
 
         else:
-            raise ValueError("Token {} inválido".format(repr(self.code[self.position])))
+            raise ValueError("Tokenizer Error: Token > {} < is invalid".format(repr(self.code[self.position])))
 
         print(Parser.tokens.actual.value)
 
@@ -91,11 +91,11 @@ class Parser:
                 while Parser.tokens.actual.type != "END":
                     Parser.parseStatement()
                     if Parser.tokens.actual.type != "LINEFEED":
-                        raise ValueError("Não quebrou linha depois de um statement")
+                        raise ValueError("Parser Error (Statements): Expected a linebreak, got token > {} <".format(Parser.tokens.actual.value))
             else:
-                raise ValueError("Não quebrou linha depois de BEGIN")
+                raise ValueError("Parser Error (Statements): Expected a linebreak after BEGIN, got token > {} <".format(Parser.tokens.actual.value))
         else:
-            raise ValueError("BEGIN inexistênte")
+            raise ValueError("Parser Error (Statements): Expected BEGIN, got token > {} <".format(Parser.tokens.actual.value))
 
     @staticmethod
     def parseStatement():
@@ -106,7 +106,7 @@ class Parser:
                 Parser.tokens.selectNext()
                 Parser.parseExpression()
             else:
-                raise ValueError("IDENTIFIER não designado")
+                raise ValueError("Parser Error (Statement): Expected =, got token > {} <".format(Parser.tokens.actual.value))
 
         elif Parser.tokens.actual.type == "PRINT":
             Parser.tokens.selectNext()
@@ -161,9 +161,9 @@ class Parser:
                     Parser.tokens.selectNext()
 
                 else:
-                    raise ValueError("Não fechou parênteses")
+                    raise ValueError("Parser Error (Factor): Expected ), got token > {} <".format(Parser.tokens.actual.value))
             else:
-                raise ValueError("Começou com parênteses errado")
+                raise ValueError("Parser Error (Factor): Expected (, got token > {} <".format(Parser.tokens.actual.value))
 
         elif Parser.tokens.actual.type == "UNARY_OP":
             if Parser.tokens.actual.value == "+":
@@ -173,7 +173,7 @@ class Parser:
                 output = UnOp("-", [Parser.parseFactor()])
 
         else:
-            raise ValueError("Após operador deve haver um número")
+            raise ValueError("Parser Error (Factor): Expected a number, got token > {} <".format(Parser.tokens.actual.value))
         return output
 
     @staticmethod
@@ -181,7 +181,7 @@ class Parser:
         Parser.tokens = Tokenizer(PrePro.filtra(code).rstrip())
         res = Parser.parseExpression()
         if Parser.tokens.actual.value != "EOF":
-            raise ValueError("Erro sintático. Último token não é o EOF.")
+            raise ValueError("Run (EOF Check): Expected EOF, got token > {} <".format(Parser.tokens.actual.value))
         return res.evaluate()
 
 class PrePro:
