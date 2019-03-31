@@ -1,21 +1,23 @@
 # VBA-Compiler
 ### Martim Ferreira José - Engenharia de Computação Insper
 
-## Gramática
-G = ({E, T, F, +, -, *, /, (, ), n}, {+, -, *, /, (, ), n}, P, E)
-
 ## Diagrama Sintático
 ![Diagrama Sintático](diagrama_sintatico.png)
 
 ## EBNF
-
+- comandos = “Begin”, “\n”, comando, “\n”, { comando, “\n” }, “End” ;
+- comando = atribuição | print | comandos ;
+- atribuição = identificador, “=”, expressão ;
 - expressão = termo, { (“+” | “-”), termo } ;
 - termo = fator, { (“*” | “/”), fator } ;
-- fator = (“+” | “-”) fator | número, “(” expressão “)” ;
-- número = “-2^63” | ... | “2^63” ;
+- fator = (“+” | “-”), fator | número | “(”, expressão, “)” | identificador ;
+- identificador = letra, { letra | digito | “_” } ;
+- número = dígito, { dígito } ;
+- letra = ( "a" | ... | "z" | "A" | ... | "Z" ) ;
+- dígito = ( "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ) ;
 
 ## Como utilizar
-Para utilizar o compilador nesta fase inicial, rode o arquivo `main.py`. Para alterar a equação que será executada, modifique o arquivo *test_file.vbs*.
-
-## Testes
-Para relizar os testes do compilador, execute o arquivo `test.py`.
+Para utilizar o compilador, rode o arquivo `main.py`, passando como argumento o arquivo **.vbs* a ser compilado. Para testar com o arquivo de teste:
+```bash
+$ python main.py test_file.vbs
+```

@@ -59,7 +59,7 @@ class Tokenizer:
         
         elif self.code[self.position].isalpha():
             identifier_token = ""
-            while self.position < len(self.code) and self.code[self.position].isidentifier():
+            while self.position < len(self.code) and self.code[self.position].isalnum() or self.code[self.position] == "_":
                 identifier_token += str(self.code[self.position]).upper()
                 self.position += 1
 
@@ -70,4 +70,4 @@ class Tokenizer:
                 self.actual = Token("IDENTIFIER", identifier_token)
 
         else:
-            raise ValueError("Tokenizer Error: Token > {} < is invalid".format(repr(self.code[self.position])))
+            raise ValueError("Tokenizer Error: Token {} is invalid".format(repr(self.code[self.position])))

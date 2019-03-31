@@ -43,7 +43,7 @@ class Parser:
                 Parser.tokens.selectNext()
                 return Assigment("=", [identifier, Parser.parseExpression()])
             else:
-                raise NameError("Parser Error (Statement): Name {} not defined".format(identifier))
+                raise NameError("Parser Error (Statement): Name {} not defined".format(identifier.value))
 
         elif Parser.tokens.actual.type == "PRINT":
             Parser.tokens.selectNext()
@@ -124,7 +124,7 @@ class Parser:
     @staticmethod
     def run(code):
         st = SymbolTable()
-        print(repr(PrePro.filtra(code)))
+        # print(repr(PrePro.filtra(code)))
         Parser.tokens = Tokenizer(PrePro.filtra(code))
         Parser.tokens.selectNext()
         res = Parser.parseStatements()
