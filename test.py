@@ -1,9 +1,5 @@
 import unittest
-from main import Parser
-
-__author__ = "Martim Ferreira José"
-__version__ = "2.0.1"
-__license__ = "MIT"
+from parser import Parser
 
 class TestCase(unittest.TestCase):
     def test_plus(self):

@@ -1,2 +1,10 @@
-' Este é um arquivo de entrada teste
-(2+7)*3/(2-4++2-+-1)+7/2 ' Operação teste
+' teste
+
+BEGIN
+    x = 10
+    BEGIN
+    y = 30
+    print x
+    end
+    print y
+END
