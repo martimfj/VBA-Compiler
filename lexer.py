@@ -10,7 +10,6 @@ class Tokenizer:
         self.actual = Token("None", "None")
 
     def selectNext(self):
-        #print(repr(self.actual.value))
         if self.position == len(self.code):
             self.actual = Token("EOF", "EOF")
             return

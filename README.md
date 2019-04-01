@@ -1,5 +1,4 @@
-# VBA-Compiler
-### Martim Ferreira José - Engenharia de Computação Insper
+# VBA Compiler
 
 ## Diagrama Sintático
 ![Diagrama Sintático](diagrama_sintatico.png)
