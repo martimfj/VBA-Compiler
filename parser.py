@@ -8,30 +8,15 @@ class Parser:
     def parseStatements():
         statements = []
 
-        if Parser.tokens.actual.type == "BEGIN":
-            Parser.tokens.selectNext()
+        while True:
+            statements.append(Parser.parseStatement())
+            
             if Parser.tokens.actual.type == "LINEFEED":
                 Parser.tokens.selectNext()
-                while Parser.tokens.actual.type != "END":
-                    statements.append(Parser.parseStatement())
-                    
-                    if Parser.tokens.actual.type == "LINEFEED":
-                        Parser.tokens.selectNext()
-                    else:
-                        raise ValueError("Parser Error (Statements): Expected a linebreak after statement, got token {}".format(repr(Parser.tokens.actual.value)))
-                
-                if Parser.tokens.actual.type == "END":
-                    Parser.tokens.selectNext()
-                    if Parser.tokens.actual.type == "LINEFEED":
-                        return Statements('statements', statements)
-                    else:
-                        raise ValueError("Parser Error (Statements): Expected a linebreak after END, got token {}".format(repr(Parser.tokens.actual.value)))
-                else:
-                    raise ValueError("Parser Error (Statements): Expected END, got token {}".format(repr(Parser.tokens.actual.value)))
-            else:
-                raise ValueError("Parser Error (Statements): Expected a linebreak after BEGIN, got token {}".format(repr(Parser.tokens.actual.value)))
-        else:
-            raise ValueError("Parser Error (Statements): Expected BEGIN, got token {}".format(repr(Parser.tokens.actual.value)))
+            elif Parser.tokens.actual.type in ["EOF", "END", "WEND"]:
+                break
+
+        return Statements('statements', statements)
 
     @staticmethod
     def parseStatement():
