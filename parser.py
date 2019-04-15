@@ -181,7 +181,6 @@ class Parser:
     @staticmethod
     def run(code):
         st = SymbolTable()
-        print(repr(PrePro.filtra(code)))
         Parser.tokens = Tokenizer(PrePro.filtra(code))
         Parser.tokens.selectNext()
         res = Parser.parseStatements()
