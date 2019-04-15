@@ -50,7 +50,7 @@ class Tokenizer:
             self.position += 1
 
         elif self.code[self.position] == "=":
-            self.actual = Token("ASSIGNMENT", "=")
+            self.actual = Token("EQUAL", "=")
             self.position += 1
 
         elif self.code[self.position] == "\n":
@@ -66,19 +66,19 @@ class Tokenizer:
 
         elif self.code[self.position].isalpha():
             identifier_token = ""
-            while self.position < len(self.code) and self.code[self.position].isalnum() or self.code[self.position] == "_":
+            while self.position < len(self.code) and (self.code[self.position].isalnum() or self.code[self.position] == "_"):
                 identifier_token += str(self.code[self.position]).upper()
                 self.position += 1
 
             reserved_words = ["PRINT", "END", "WHILE", "WEND", "IF", "ELSE", "THEN", "INPUT"]
-            logical_operators = ["AND", "OR", "NOT"]
             if identifier_token in reserved_words:
                 self.actual = Token(identifier_token, identifier_token)
             else:
-                if identifier_token in logical_operators:
+                if identifier_token in ["AND", "OR"]:
                     self.actual = Token("LOGIC_BINARY_OP", identifier_token)
+                elif identifier_token == "NOT":
+                    self.actual = Token("LOGIC_UNARY_OP", identifier_token)
                 else:
                     self.actual = Token("IDENTIFIER", identifier_token)
-
         else:
             raise ValueError("Tokenizer Error: Token {} is invalid".format(repr(self.code[self.position])))
