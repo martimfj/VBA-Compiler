@@ -5,16 +5,47 @@ from lexer import Tokenizer
 
 class Parser:
     @staticmethod
-    def parseStatements():
+    def parseProgram():
         statements = []
 
-        while Parser.tokens.actual.type not in ["EOF", "END", "WEND", "ELSE"]:
-            statements.append(Parser.parseStatement())
-
-            if Parser.tokens.actual.type == "LINEFEED":
+        if Parser.tokens.actual.type == "SUB":
+            Parser.tokens.selectNext()
+            if Parser.tokens.actual.type == "MAIN":
                 Parser.tokens.selectNext()
+                if Parser.tokens.actual.value == "(":
+                    Parser.tokens.selectNext()
+                    if Parser.tokens.actual.value == ")":
+                        Parser.tokens.selectNext()
+                        if Parser.tokens.actual.type == "LINEFEED":
+                            Parser.tokens.selectNext()
 
-        return Statements('statements', statements)
+                            while Parser.tokens.actual.type != "END":
+                                statements.append(Parser.parseStatement())
+
+                                if Parser.tokens.actual.type == "LINEFEED":
+                                    Parser.tokens.selectNext()
+                            
+                            if Parser.tokens.actual.type == "END":
+                                Parser.tokens.selectNext()
+
+                                if Parser.tokens.actual.type == "SUB":
+                                    Parser.tokens.selectNext()
+                                else:
+                                    raise ValueError("Parser Error (Program): Expected SUB, got token {}".format(repr(Parser.tokens.actual.value)))
+                            else:
+                                raise ValueError("Parser Error (Program): Expected END, got token {}".format(repr(Parser.tokens.actual.value)))
+                        else:
+                            raise ValueError("Parser Error (Program): Expected '\n', got token {}".format(repr(Parser.tokens.actual.value)))
+                    else:
+                        raise ValueError("Parser Error (Program): Expected ), got token {}".format(repr(Parser.tokens.actual.value)))
+                else:
+                    raise ValueError("Parser Error (Program): Expected (, got token {}".format(repr(Parser.tokens.actual.value)))
+            else:
+                raise ValueError("Parser Error (Program): Expected MAIN, got token {}".format(repr(Parser.tokens.actual.value)))
+        else:
+            raise ValueError("Parser Error (Program): Expected SUB, got token {}".format(repr(Parser.tokens.actual.value)))
+        
+        return Program('program', statements)
 
     @staticmethod
     def parseStatement():
@@ -24,13 +55,13 @@ class Parser:
 
             if Parser.tokens.actual.type == "EQUAL":
                 Parser.tokens.selectNext()
-                return Assigment("=", [identifier, Parser.parseExpression()])
+                return Assigment("=", [identifier, Parser.parseRelExpression()])
             else:
                 raise NameError("Parser Error (Statement): Name {} not defined".format(identifier.value))
 
         elif Parser.tokens.actual.type == "PRINT":
             Parser.tokens.selectNext()
-            return Print('print', [Parser.parseExpression()])
+            return Print('print', [Parser.parseRelExpression()])
 
         elif Parser.tokens.actual.type == "WHILE":
             Parser.tokens.selectNext()
@@ -38,9 +69,16 @@ class Parser:
 
             if Parser.tokens.actual.type == "LINEFEED":
                 Parser.tokens.selectNext()
-                statements = Parser.parseStatements()
+                statements = []
+                while Parser.tokens.actual.type != "WEND":
+                    statements.append(Parser.parseStatement())
 
-                if Parser.tokens.actual.type == "WEND":
+                    if Parser.tokens.actual.type == "LINEFEED":
+                        Parser.tokens.selectNext()
+                    else:
+                        raise ValueError("Parser Error (Statement): Expected '\n', got token {}".format(repr(Parser.tokens.actual.value)))
+                
+                if Parser.tokens.actual.type == "WEND": #Just an excuse to consume the token and SelectNext
                     Parser.tokens.selectNext()
                     return While("WHILE", [rel_exp, statements])
                 else:
@@ -57,11 +95,32 @@ class Parser:
                 Parser.tokens.selectNext()
                 if Parser.tokens.actual.type == "LINEFEED":
                     Parser.tokens.selectNext()
+                    
+                    statements_if = []
+                    while Parser.tokens.actual.type not in ["ELSE", "END"]:
+                        statements_if.append(Parser.parseStatement())
 
-                    statements_if = Parser.parseStatements()
+                        if Parser.tokens.actual.type == "LINEFEED":
+                            Parser.tokens.selectNext()
+                        else:
+                            raise ValueError("Parser Error (Statement): Expected '\n', got token {}".format(repr(Parser.tokens.actual.value)))
+                    
                     if Parser.tokens.actual.type == "ELSE":
                         Parser.tokens.selectNext()
-                        statements_else = Parser.parseStatements()
+
+                        if Parser.tokens.actual.type == "LINEFEED":
+                            Parser.tokens.selectNext()
+
+                            statements_else = []
+                            while Parser.tokens.actual.type != "END":
+                                statements_else.append(Parser.parseStatement())
+
+                                if Parser.tokens.actual.type == "LINEFEED":
+                                    Parser.tokens.selectNext()
+                                else:
+                                    raise ValueError("Parser Error (Statement): Expected '\n', got token {}".format(repr(Parser.tokens.actual.value)))
+                        else:
+                            raise ValueError("Parser Error (Statement): Expected '\n', got token {}".format(repr(Parser.tokens.actual.value)))
 
                     if Parser.tokens.actual.type == "END":
                         Parser.tokens.selectNext()
@@ -76,6 +135,22 @@ class Parser:
                     raise ValueError("Parser Error (Statement): Expected '\n', got token {}".format(repr(Parser.tokens.actual.value)))
             else:
                 raise ValueError("Parser Error (Statement): Expected THEN, got token {}".format(repr(Parser.tokens.actual.value)))
+        
+        elif Parser.tokens.actual.type == "DIM":
+            Parser.tokens.selectNext()
+
+            if Parser.tokens.actual.type == "IDENTIFIER":
+                identifier = Indentifier(Parser.tokens.actual.value)
+                Parser.tokens.selectNext()
+
+                if Parser.tokens.actual.type == "AS":
+                    Parser.tokens.selectNext()
+                    return VarDec("VarDec", [identifier, Parser.parseType()])
+                else:
+                    raise ValueError("Parser Error (Statement): Expected AS, got token {}".format(repr(Parser.tokens.actual.value)))
+            else:
+                raise ValueError("Parser Error (Statement): Expected an IDENTIFIER, got token {}".format(repr(Parser.tokens.actual.value)))
+
         else:
             return NoOp()
 
@@ -155,9 +230,27 @@ class Parser:
             elif Parser.tokens.actual.value == "NOT":
                 Parser.tokens.selectNext()
                 output = UnOp("NOT", [Parser.parseFactor()])
+
+        elif Parser.tokens.actual.value in ["TRUE", "FALSE"]:
+            output = BoolValue(Parser.tokens.actual.value)
+            Parser.tokens.selectNext()
+
         else:
             raise ValueError("Parser Error (Factor): Token {} is invalid".format(repr(Parser.tokens.actual.value)))
         return output
+
+    @staticmethod
+    def parseType():
+        if Parser.tokens.actual.type == "INTEGER":
+            Parser.tokens.selectNext()
+            return Type("INT")
+
+        elif Parser.tokens.actual.type == "BOOLEAN":
+            Parser.tokens.selectNext() 
+            return Type("BOOLEAN")
+            
+        else:
+            raise ValueError("Parser Error (Type): Token {} type is not supported".format(repr(Parser.tokens.actual.type)))
 
     @staticmethod
     def parseRelExpression():
@@ -183,7 +276,7 @@ class Parser:
         st = SymbolTable()
         Parser.tokens = Tokenizer(PrePro.filtra(code))
         Parser.tokens.selectNext()
-        res = Parser.parseStatements()
+        res = Parser.parseProgram()
 
         Parser.tokens.selectNext()
         if Parser.tokens.actual.value != "EOF":

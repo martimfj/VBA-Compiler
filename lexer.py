@@ -70,15 +70,10 @@ class Tokenizer:
                 identifier_token += str(self.code[self.position]).upper()
                 self.position += 1
 
-            reserved_words = ["PRINT", "END", "WHILE", "WEND", "IF", "ELSE", "THEN", "INPUT"]
+            reserved_words = ["PRINT", "END", "WHILE", "WEND", "IF", "ELSE", "THEN", "INPUT", "SUB", "MAIN", "DIM", "AS", "TRUE", "FALSE", "AND", "OR", "NOT", "INTEGER", "BOOLEAN"]
             if identifier_token in reserved_words:
                 self.actual = Token(identifier_token, identifier_token)
             else:
-                if identifier_token in ["AND", "OR"]:
-                    self.actual = Token("LOGIC_BINARY_OP", identifier_token)
-                elif identifier_token == "NOT":
-                    self.actual = Token("LOGIC_UNARY_OP", identifier_token)
-                else:
-                    self.actual = Token("IDENTIFIER", identifier_token)
+                self.actual = Token("IDENTIFIER", identifier_token)
         else:
             raise ValueError("Tokenizer Error: Token {} is invalid".format(repr(self.code[self.position])))
