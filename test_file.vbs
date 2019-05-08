@@ -22,7 +22,6 @@ end if
 while flag
     if quantity > 0 then
         print savings * quantity
-        print 0
         quantity = quantity - 1
     else
         flag = false
