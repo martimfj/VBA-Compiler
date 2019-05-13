@@ -29,6 +29,8 @@ class BinOp(Node):
                 return (child_value[0] > child_value[1], "BOOLEAN")
             elif self.value == "<":
                 return (child_value[0] < child_value[1], "BOOLEAN")
+            elif self.value == "=":
+                return (child_value[0] == child_value[1], "BOOLEAN")
 
         elif child_type[0] == "BOOLEAN" and child_type[1] == "BOOLEAN":
             if self.value == "=":
@@ -49,11 +51,11 @@ class UnOp(Node):
         child_value, child_type = self.children[0].evaluate(st)
 
         if child_type == "INT" and self.value == "-":
-            return - child_value
+            return (-child_value, "INT")
         elif child_type == "INT" and self.value == "+":
-            return child_value
+            return (child_value, "INT")
         elif child_type == "BOOLEAN" and self.value == "NOT":
-            return not child_value
+            return (not child_value, "BOOLEAN")
         else:
             raise ValueError("AST Error (UnOp): Operation can not be performed: {} {} ".format(self.value, child_value))
 
@@ -88,7 +90,7 @@ class Assigment(Node):
         child_value, child_type = self.children[1].evaluate(st)
 
         if declared_type == child_type:
-            st.setter(self.children[0].value, self.children[1].evaluate(st)[0])
+            st.setter(self.children[0].value, child_value)
         else:
             raise ValueError("AST Error (Assingment): Type mismatch: {}({}) = {}({}) ".format(self.children[0].value, declared_type, child_value, child_type))
 
@@ -164,7 +166,7 @@ class Input(Node):
 
     def evaluate(self, st):
         try:
-            return (int(input()), "INT")
+            return (int(input("Input: ")), "INT")
         except:
             raise ValueError("AST Error (Input): Only INT is a valid input type")
 

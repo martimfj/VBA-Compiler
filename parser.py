@@ -57,7 +57,7 @@ class Parser:
                 Parser.tokens.selectNext()
                 return Assigment("=", [identifier, Parser.parseRelExpression()])
             else:
-                raise NameError("Parser Error (Statement): Name {} not defined".format(identifier.value))
+                raise NameError("Parser Error (Statement): Name {} not defined".format(repr(identifier.value)))
 
         elif Parser.tokens.actual.type == "PRINT":
             Parser.tokens.selectNext()
@@ -209,7 +209,7 @@ class Parser:
         elif Parser.tokens.actual.type == "BRACKETS":
             if Parser.tokens.actual.value == "(":
                 Parser.tokens.selectNext()
-                output = Parser.parseExpression()
+                output = Parser.parseRelExpression()
 
                 if Parser.tokens.actual.value == ")":
                     Parser.tokens.selectNext()
