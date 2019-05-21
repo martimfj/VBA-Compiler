@@ -13,7 +13,7 @@ Sub main()
         teste_int = teste_int - 1
     wend
 
-    teste_int = 10
+    teste_int = input
     print teste_int
 
 End Sub

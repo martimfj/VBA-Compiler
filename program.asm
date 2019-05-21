@@ -136,7 +136,6 @@ _start:
   JMP LOOP_33
   EXIT_33:
 
-
   MOV EBX, 10
   MOV [EBP-8], EBX  ; TESTE_INT = 10 
   MOV EBX, [EBP-8]
