@@ -50,7 +50,7 @@ class Parser:
     @staticmethod
     def parseStatement():
         if Parser.tokens.actual.type == "IDENTIFIER":
-            identifier = Indentifier(Parser.tokens.actual.value)
+            identifier = Identifier(Parser.tokens.actual.value)
             Parser.tokens.selectNext()
 
             if Parser.tokens.actual.type == "EQUAL":
@@ -140,7 +140,7 @@ class Parser:
             Parser.tokens.selectNext()
 
             if Parser.tokens.actual.type == "IDENTIFIER":
-                identifier = Indentifier(Parser.tokens.actual.value)
+                identifier = Identifier(Parser.tokens.actual.value)
                 Parser.tokens.selectNext()
 
                 if Parser.tokens.actual.type == "AS":
@@ -199,7 +199,7 @@ class Parser:
             Parser.tokens.selectNext()
 
         elif Parser.tokens.actual.type == "IDENTIFIER":
-            output = Indentifier(Parser.tokens.actual.value)
+            output = Identifier(Parser.tokens.actual.value)
             Parser.tokens.selectNext()
 
         elif Parser.tokens.actual.type == "INPUT":

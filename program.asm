@@ -8,6 +8,9 @@ False equ 0
 
 segment .data
 
+segment .bss
+  res RESB 1
+
 section .text
   global _start
 
@@ -60,8 +63,88 @@ binop_exit:
   RET
 
 _start:
+  PUSH EBP
+  MOV EBP, ESP
+  PUSH DWORD 0      ; Dim TESTE_BOOL as BOOLEAN - [EBP−4]
+  PUSH DWORD 0      ; Dim TESTE_INT as INT - [EBP−8]
 
-POP EBP
-MOV EAX, 1
-INT 0x80
+  MOV EBX, True
+  MOV [EBP-4], EBX  ; TESTE_BOOL = True 
+
+  MOV EBX, 10
+  MOV [EBP-8], EBX  ; TESTE_INT = 10 
+  MOV EBX, [EBP-4]
+  CMP EBX, False
+  JE EXIT_18
+  MOV EBX, [EBP-8]
+  PUSH EBX
+
+  MOV EBX, 10
+  POP EAX
+
+  ADD EAX, EBX      ; Addition: 10 + 10
+  MOV EBX, EAX
+
+  PUSH EBX
+  CALL print
+  POP EBX
+  EXIT_18:
+
+  LOOP_33:
+  MOV EBX, [EBP-8]
+  PUSH EBX
+
+  MOV EBX, 0
+  POP EAX
+
+  CMP EAX, EBX      ; Greater-than: 10 > 0
+  CALL binop_jg
+
+  PUSH EBX
+  MOV EBX, [EBP-4]
+  POP EAX
+
+
+  ; And: True & True
+  AND EAX, EBX
+  MOV EBX, EAX
+
+  PUSH EBX
+
+  MOV EBX, True
+  POP EAX
+
+  CMP EAX, EBX      ; Equal: True == True
+  CALL binop_je
+
+  CMP EBX, False
+  JE EXIT_33
+  MOV EBX, [EBP-8]
+  PUSH EBX
+  CALL print
+  POP EBX
+  MOV EBX, [EBP-8]
+  PUSH EBX
+
+  MOV EBX, 1
+  POP EAX
+
+  SUB EAX, EBX      ; Subtraction: 10 - 1
+  MOV EBX, EAX
+
+  MOV [EBP-8], EBX  ; TESTE_INT = 9 
+  JMP LOOP_33
+  EXIT_33:
+
+
+  MOV EBX, 10
+  MOV [EBP-8], EBX  ; TESTE_INT = 10 
+  MOV EBX, [EBP-8]
+  PUSH EBX
+  CALL print
+  POP EBX
+
+  POP EBP
+  MOV EAX, 1
+  INT 0x80
 

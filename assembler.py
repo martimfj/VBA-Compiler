@@ -12,6 +12,11 @@ DATA_SEG = [
 "segment .data"
 ]
 
+BSS_SEG = [
+"segment .bss",
+"  res RESB 1"
+]
+
 TEXT_SEG =[
 "section .text",
 "  global _start"
@@ -78,27 +83,30 @@ IF_WHILE_SUBROUTINE = [
 ]
 
 INTERRUPT = [
-"POP EBP",
-"MOV EAX, 1",
-"INT 0x80"
+"  POP EBP",
+"  MOV EAX, 1",
+"  INT 0x80"
 ]
 
 class Assembler:
-    bss_segment = ["segment .bss", "  res RESB 1"]
-    program = ["_start:"]
+    program = ["_start:", "  PUSH EBP", "  MOV EBP, ESP"]
 
     @staticmethod
     def write_line(line):
         Assembler.program.append("  " + line)
 
     @staticmethod
-    def write_bss(line):
-        Assembly.bss_segment.append("  " + line)
+    def write_comment(line):
+        Assembler.program.append("\n  ; " + line)
+
+    @staticmethod
+    def clean_line():
+        Assembler.program.append("\r")
 
     @staticmethod
     def write_file():
         code = []
-        sections = [CONSTANTS, DATA_SEG, TEXT_SEG, PRINT_SUBROUTINE, IF_WHILE_SUBROUTINE, Assembler.program, INTERRUPT]
+        sections = [CONSTANTS, DATA_SEG, BSS_SEG, TEXT_SEG, PRINT_SUBROUTINE, IF_WHILE_SUBROUTINE, Assembler.program, INTERRUPT]
         for section in sections:
             code.extend(section)
             code.append("\r")

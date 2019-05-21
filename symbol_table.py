@@ -6,9 +6,10 @@ class SymbolTable():
 
     def __init__(self):
         self.table = {}
+        self.size = 0
 
     def declare(self, variable_name, variable_type):
-        """Define the variable name and type in the table.
+        """Define the variable name, type and offset in the table.
 
         Arguments:
             variable_name {string}
@@ -19,12 +20,13 @@ class SymbolTable():
         """
 
         if variable_name not in self.table.keys():
-            self.table[variable_name] = [None, variable_type]
+            self.size += 1
+            self.table[variable_name] = [None, variable_type, self.size * 4]
         else:
             raise ValueError("Symbol Table Error: Variable {} already declared".format(variable_name))
 
     def getter(self, variable_name):
-        """Return tuple with variable value and type.
+        """Return tuple with variable value, type and offset.
 
         Arguments:
             variable_name {string}
@@ -38,7 +40,7 @@ class SymbolTable():
         else:
             raise ValueError("Symbol Table Error: Variable {} does not exist".format(variable_name))
 
-    def setter(self, variable_name, variable_value):
+    def setter(self, variable_name, variable_value, variable_type):
         """Initialize a value for the variable.
 
         Arguments:
@@ -50,6 +52,9 @@ class SymbolTable():
         """
 
         if variable_name in self.table.keys():
-            self.table[variable_name][0] = variable_value
+            if self.table[variable_name][1] == variable_type:
+                self.table[variable_name][0] = variable_value
+            else:
+                raise ValueError("Symbol Table Error (Setter): Type mismatch: {}({}) = {}({}) ".format(variable_name, self.table[variable_name][2], variable_value, variable_type))
         else:
-            raise ValueError("Symbol Table Error: Variable {} not declared".format(variable_name))
+            raise ValueError("Symbol Table Error (Setter): Variable {} not declared".format(variable_name))

@@ -1,31 +1,19 @@
-sub main()
+Sub main()
+    Dim teste_bool as boolean
+    Dim teste_int as integer
+    teste_bool = True
+    teste_int = 10
 
-dim savings as integer
-dim price1 as integer
-dim price2 as integer
-dim quantity as integer
-dim flag as boolean
-
-price1 = 154
-price2 = 352
-quantity = 6
-flag = true
-
-if price1 > price2 then
-    savings = price1-price2
-    print savings
-else
-    savings = price2-price1
-    print savings
-end if
-
-while flag
-    if quantity > 0 then
-        print savings * quantity
-        quantity = quantity - 1
-    else
-        flag = false
+    if teste_bool then
+        print teste_int + 10
     end if
-wend
 
-end sub
+    while (teste_int > 0) and teste_bool = True
+        print teste_int
+        teste_int = teste_int - 1
+    wend
+
+    teste_int = 10
+    print teste_int
+
+End Sub
