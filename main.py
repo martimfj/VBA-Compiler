@@ -9,7 +9,7 @@ import os
 
 def main():
     try:
-        filename = sys.argv[1] #"test_file.vbs" 
+        filename = sys.argv[1] #"test_file.vbs"
     except IndexError:
         print("This program needs an input .vbs file to continue. Exiting...")
         sys.exit(1)

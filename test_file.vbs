@@ -1,19 +1,12 @@
 Sub main()
-    Dim teste_bool as boolean
-    Dim teste_int as integer
-    teste_bool = True
-    teste_int = 10
+    ' bool ops
+    Dim bt as boolean
+    Dim bf as boolean
+    bt = True
+    bf = False
 
-    if teste_bool then
-        print teste_int + 10
-    end if
-
-    while (teste_int > 0) and teste_bool = True
-        print teste_int
-        teste_int = teste_int - 1
-    wend
-
-    teste_int = input
-    print teste_int
-
-End Sub
+    print bf and bt
+    print bf or bt
+    print not(not(bf))
+    print not((bt and bf) or bf)
+end sub

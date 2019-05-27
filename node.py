@@ -79,8 +79,7 @@ class BinOp(Node):
                 return (child_r[0] or child_l[0], "BOOLEAN")
 
             elif self.value == "AND":
-                Assembler.write_comment("And: {} & {}".format(child_r[0], child_l[0]))
-                Assembler.write_line("AND EAX, EBX")
+                Assembler.write_line("AND EAX, EBX      ; And: {} & {}".format(child_r[0], child_l[0]))
                 Assembler.write_line("MOV EBX, EAX")
                 Assembler.clean_line()
                 return (child_r[0] and child_l[0], "BOOLEAN")
@@ -94,20 +93,24 @@ class UnOp(Node):
         self.id = Node.newID()
 
     def evaluate(self, st):
-        child_value = self.children[0].evaluate(st)[0]
-        child_type = self.children[0].evaluate(st)[1]
+        child = self.children[0].evaluate(st)
+        child_value = child[0]
+        child_type = child[1]
 
         if child_type == "INT" and self.value == "-":
-            return (-child_value, "INT")
             # Assembler.write_line("NEG EAX           ; Negativize: -{}".format(child_value))
+            return (-child_value, "INT")
 
         elif child_type == "INT" and self.value == "+":
             return (child_value, "INT")
-            # Assembler.write_line("NOP               ; Positivize: +{}".format(child_value))
-            
+
         elif child_type == "BOOLEAN" and self.value == "NOT":
-            return (not child_value, "BOOLEAN")
-            # Assembler.write_line("NOT EAX           ; Negation: !{}".format(child_value))
+            if child_value == True:
+                Assembler.write_line("MOV EBX, False    ; Negation: !{}".format(child_value))
+                return (child_value, "BOOLEAN")
+            else:
+                Assembler.write_line("MOV EBX, True     ; Negation: !{}".format(child_value))
+                return (not child_value, "BOOLEAN")
         else:
             raise ValueError("AST Error (UnOp): Operation can not be performed: {} {} ".format(self.value, child_value))
 
@@ -147,10 +150,8 @@ class Assigment(Node):
     def evaluate(self, st):
         _, declared_type, offset = st.getter(self.children[0].value)
         child_value, child_type = self.children[1].evaluate(st)
-
         st.setter(self.children[0].value, child_value, child_type)
         Assembler.write_line("MOV [EBP-{}], EBX  ; {} = {} ".format(offset, self.children[0].value, child_value))
-
 
 class Program(Node):
     def __init__(self, value, children):
@@ -173,6 +174,7 @@ class Print(Node):
         Assembler.write_line("PUSH EBX")
         Assembler.write_line("CALL print")
         Assembler.write_line("POP EBX")
+        Assembler.clean_line()
 
 class While(Node):
     """
