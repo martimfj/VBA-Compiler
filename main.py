@@ -1,5 +1,5 @@
 __author__ = "Martim Ferreira José"
-__version__ = "2.3.1"
+__version__ = "2.4.1"
 __license__ = "MIT"
 
 from parser import Parser

@@ -1,16 +1,14 @@
+from symbol_table import SymbolTable
+
 class Node():
-    def __init__(self):
-        self.value = None
-        self.children = []
+    def __init__(self, value = None, children = None):
+        self.value = value
+        self.children = children
 
     def evaluate(self, st):
         pass
 
 class BinOp(Node):
-    def __init__(self, value, children):
-        self.value = value
-        self.children = children
-
     def evaluate(self, st):
         children = [child.evaluate(st) for child in self.children]
         child_value = [child[0] for child in children]
@@ -43,10 +41,6 @@ class BinOp(Node):
             raise ValueError("AST Error (BinOp): Operation can not be performed: {} {} {} ".format(child_value[0], self.value, child_value[1]))
 
 class UnOp(Node):
-    def __init__(self, value, children):
-        self.value = value
-        self.children = children
-
     def evaluate(self, st):
         child_value, child_type = self.children[0].evaluate(st)
 
@@ -60,31 +54,14 @@ class UnOp(Node):
             raise ValueError("AST Error (UnOp): Operation can not be performed: {} {} ".format(self.value, child_value))
 
 class IntVal(Node):
-    def __init__(self, value):
-        self.value = value
-
     def evaluate(self, st):
         return (self.value, "INT")
 
-class Indentifier(Node):
-    def __init__(self, value):
-        self.value = value
-
+class Identifier(Node):
     def evaluate(self, st):
         return st.getter(self.value)
 
 class Assigment(Node):
-    """
-    Value: "="
-    Children: [Identifier (String), Value (Boolean or Int)]
-
-    Usage: Assigment("=", [identifier, Parser.parseRelExpression()])
-    """
-
-    def __init__(self, value, children):
-        self.value = value
-        self.children = children
-
     def evaluate(self, st):
         declared_type = st.getter(self.children[0].value)[1]
         child_value, child_type = self.children[1].evaluate(st)
@@ -95,34 +72,15 @@ class Assigment(Node):
             raise ValueError("AST Error (Assingment): Type mismatch: {}({}) = {}({}) ".format(self.children[0].value, declared_type, child_value, child_type))
 
 class Program(Node):
-    def __init__(self, value, children):
-        self.value = value
-        self.children = children
-
     def evaluate(self, st):
         for child in self.children:
             child.evaluate(st)
 
 class Print(Node):
-    def __init__(self, value, children):
-        self.value = value
-        self.children = children
-
     def evaluate(self, st):
         print(self.children[0].evaluate(st)[0])
 
 class While(Node):
-    """
-    Value: "WHILE"
-    Children: [BinOp (Boolean), Statements]
-
-    Usage: While("WHILE", [rel_exp, statements]) 
-    """
-    
-    def __init__(self, value, children):
-        self.value = value
-        self.children = children
-
     def evaluate(self, st):
         _, relexp_type = self.children[0].evaluate(st)
         if relexp_type == "BOOLEAN":
@@ -133,18 +91,6 @@ class While(Node):
             raise ValueError("AST Error (While): {} is not a valid relational expression type".format(relexp_type))
 
 class If(Node):
-    """
-    Value: "IF"
-    Children: [BinOp (Boolean), list(Statements)] or [BinOp (Boolean), list(Statements), list(Statements)]
-
-    Usage: 
-    1) If("IF", [rel_exp, statements_if, statements_else])
-    2) If("IF", [rel_exp, statements_if])
-    """
-    def __init__(self, value, children):
-        self.value = value
-        self.children = children
-
     def evaluate(self, st):
         relexp_value, relexp_type = self.children[0].evaluate(st)
 
@@ -161,9 +107,6 @@ class If(Node):
             raise ValueError("AST Error (If): {} is not a valid relational expression type".format(relexp_type))
 
 class Input(Node):
-    def __init__(self, value):
-        self.value = value
-
     def evaluate(self, st):
         try:
             return (int(input("Input: ")), "INT")
@@ -171,9 +114,6 @@ class Input(Node):
             raise ValueError("AST Error (Input): Only INT is a valid input type")
 
 class BoolValue(Node):
-    def __init__(self, value):
-        self.value = value
-
     def evaluate(self, st):
         if self.value == "TRUE":
             return (True, "BOOLEAN")
@@ -181,23 +121,54 @@ class BoolValue(Node):
             return (False, "BOOLEAN")
 
 class VarDec(Node):
-    def __init__(self, value, children):
-        self.value = value
-        self.children = children
-
     def evaluate(self, st):
         st.declare(self.children[0].value, self.children[1].evaluate(st))
 
 class Type(Node):
-    def __init__(self, value):
-        self.value = value
-
     def evaluate(self, st):
         return self.value
 
-class NoOp(Node):
-    def __init__(self):
-        pass
+class FuncDec(Node):
+    def evaluate(self, st):
+        st.declare(self.value, "FUNCTION")
+        st.setter(self.value, self)
 
+class SubDec(Node):
+    def evaluate(self, st):
+        st.declare(self.value, "SUB")
+        st.setter(self.value, self)
+
+class FuncCall(Node):
+    def evaluate(self, st):
+        st = SymbolTable(st)
+        decFunc, decFunc_type = st.getter(self.value)
+
+        if decFunc_type == "SUB":
+            if len(decFunc.children[:-1]) == len(self.children):
+                for decVar, callVar in zip(decFunc.children[:-1], self.children):
+                    decVar.evaluate(st)
+                    st.setter(decVar.children[0].value, callVar.evaluate(st)[0])
+            else:
+                raise ValueError("AST Error (FuncCall): Expected {} arguments. got {}".format(len(decFunc.children[:-1]), len(self.children)))
+
+            for statement in decFunc.children[-1]:
+                statement.evaluate(st)
+
+        elif decFunc_type == "FUNCTION":
+            if len(decFunc.children[1:-1]) == len(self.children):
+                decFunc.children[0].evaluate(st)
+                for decVar, callVar in zip(decFunc.children[1:-1], self.children):
+                    decVar.evaluate(st)
+                    st.setter(decVar.children[0].value, callVar.evaluate(st)[0])
+
+            else:
+                raise ValueError("AST Error (FuncCall): Expected {} arguments. got {}".format(len(decFunc.children[:-1]), len(self.children)))
+
+            for statement in decFunc.children[-1]:
+                statement.evaluate(st)
+            
+            return st.getter(decFunc.children[0].children[0].value)
+
+class NoOp(Node):
     def evaluate(self, st):
         pass

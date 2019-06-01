@@ -74,7 +74,7 @@ class Tokenizer:
                 identifier_token += str(self.code[self.position]).upper()
                 self.position += 1
 
-            reserved_words = ["PRINT", "END", "WHILE", "WEND", "IF", "ELSE", "THEN", "INPUT", "SUB", "MAIN", "DIM", "AS", "TRUE", "FALSE", "AND", "OR", "NOT", "INTEGER", "BOOLEAN", "FUNCTION"]
+            reserved_words = ["PRINT", "END", "WHILE", "WEND", "IF", "ELSE", "THEN", "INPUT", "SUB", "DIM", "AS", "TRUE", "FALSE", "AND", "OR", "NOT", "INTEGER", "BOOLEAN", "FUNCTION", "CALL"]
             if identifier_token in reserved_words:
                 self.actual = Token(identifier_token, identifier_token)
             else:

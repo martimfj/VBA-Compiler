@@ -5,40 +5,89 @@ from lexer import Tokenizer
 
 class Parser:
     @staticmethod
-    def program():
-        statements = []
-        while Parser.tokens.actual.type != "EOP":
+    def parseSubDec():
+        subStatements = []
+        subArguments = []
+
+        if Parser.tokens.actual.type == "SUB":
             Parser.tokens.selectNext()
-            if Parser.tokens.actual.type == "SUB":
-                statements.append(subDeclaration())
-            elif Parser.tokens.actual.type == "FUNC":
-                statements.append(functionDeclaration())
+            if Parser.tokens.actual.type == "IDENTIFIER":
+                subIdentifier = Parser.tokens.actual.value
+                Parser.tokens.selectNext()
+                if Parser.tokens.actual.value == "(":
+                    Parser.tokens.selectNext()
+
+                    while Parser.tokens.actual.value != ")":
+                        if Parser.tokens.actual.type == "IDENTIFIER":
+                            subArgName = Parser.tokens.actual.value
+                            Parser.tokens.selectNext()
+                            if Parser.tokens.actual.type == "AS":
+                                Parser.tokens.selectNext()
+                                subArguments.append(VarDec("subArgDec", [Identifier(subArgName), Parser.parseType()]))
+                                if Parser.tokens.actual.type == "COMMA":
+                                    Parser.tokens.selectNext()
+                                    if Parser.tokens.actual.type != "IDENTIFIER":
+                                        raise ValueError("Parser Error (funcDeclaration): Expected an identifier, got token {}".format(repr(Parser.tokens.actual.value)))
+                            else:
+                                raise ValueError("Parser Error (subDeclaration): Expected AS, got token {}".format(repr(Parser.tokens.actual.value)))
+
+                    if Parser.tokens.actual.value == ")":
+                        Parser.tokens.selectNext()
+                        if Parser.tokens.actual.type == "LINEFEED":
+                            Parser.tokens.selectNext()
+
+                            while Parser.tokens.actual.type != "END":
+                                subStatements.append(Parser.parseStatement())
+
+                                if Parser.tokens.actual.type == "LINEFEED":
+                                    Parser.tokens.selectNext()
+                            
+                            if Parser.tokens.actual.type == "END":
+                                Parser.tokens.selectNext()
+
+                                if Parser.tokens.actual.type == "SUB":
+                                    Parser.tokens.selectNext()
+                                else:
+                                    raise ValueError("Parser Error (subDeclaration): Expected SUB, got token {}".format(repr(Parser.tokens.actual.value)))
+                            else:
+                                raise ValueError("Parser Error (subDeclaration): Expected END, got token {}".format(repr(Parser.tokens.actual.value)))
+                        else:
+                            raise ValueError("Parser Error (subDeclaration): Expected '\n', got token {}".format(repr(Parser.tokens.actual.value)))
+                    else:
+                        raise ValueError("Parser Error (subDeclaration): Expected ), got token {}".format(repr(Parser.tokens.actual.value)))
+                else:
+                    raise ValueError("Parser Error (subDeclaration): Expected (, got token {}".format(repr(Parser.tokens.actual.value)))
+            else:
+                raise ValueError("Parser Error (subDeclaration): Expected an identifier, got token {}".format(repr(Parser.tokens.actual.value)))
+        else:
+            raise ValueError("Parser Error (subDeclaration): Expected SUB, got token {}".format(repr(Parser.tokens.actual.value)))
+        
+        return SubDec(subIdentifier, subArguments + [subStatements])
 
     @staticmethod
-    def functionDeclaration():
+    def parseFuncDec():
         funcStatements = []
         funcArguments = []
 
         if Parser.tokens.actual.type == "FUNCTION":
             Parser.tokens.selectNext()
             if Parser.tokens.actual.type == "IDENTIFIER":
-                funcIdentifier = Indentifier(Parser.tokens.actual.value)
+                funcIdentifier = Parser.tokens.actual.value
                 Parser.tokens.selectNext()
                 if Parser.tokens.actual.value == "(":
                     Parser.tokens.selectNext()
 
-                    while Parser.tokens.actual.type != ")":
+                    while Parser.tokens.actual.value != ")":
                         if Parser.tokens.actual.type == "IDENTIFIER":
-                            funcArgName = Indentifier(Parser.tokens.actual.value)
+                            funcArgName = Parser.tokens.actual.value
                             Parser.tokens.selectNext()
                             if Parser.tokens.actual.type == "AS":
                                 Parser.tokens.selectNext()
-                                funcArguments.append(VarDec("funcArgDec", [funcArgName, Parser.parseType()]))
-
+                                funcArguments.append(VarDec("funcArgDec", [Identifier(funcArgName), Parser.parseType()]))
                                 if Parser.tokens.actual.type == "COMMA":
                                     Parser.tokens.selectNext()
-                                else:
-                                    raise ValueError("Parser Error (funcDeclaration): Expected a comma, got token {}".format(repr(Parser.tokens.actual.value)))
+                                    if Parser.tokens.actual.type != "IDENTIFIER":
+                                        raise ValueError("Parser Error (funcDeclaration): Expected an identifier, got token {}".format(repr(Parser.tokens.actual.value)))
                             else:
                                 raise ValueError("Parser Error (funcDeclaration): Expected AS, got token {}".format(repr(Parser.tokens.actual.value)))
 
@@ -46,13 +95,13 @@ class Parser:
                         Parser.tokens.selectNext()
                         if Parser.tokens.actual.type == "AS":
                             Parser.tokens.selectNext()
-                            funcType = VarDec("funcType", [funcIdentifier, Parser.parseType()])
+                            funcType = [VarDec("funcType", [Identifier(funcIdentifier), Parser.parseType()])]
 
                             if Parser.tokens.actual.type == "LINEFEED":
                                 Parser.tokens.selectNext()
 
                                 while Parser.tokens.actual.type != "END":
-                                    statements.append(Parser.parseStatement())
+                                    funcStatements.append(Parser.parseStatement())
 
                                     if Parser.tokens.actual.type == "LINEFEED":
                                         Parser.tokens.selectNext()
@@ -79,73 +128,12 @@ class Parser:
         else:
             raise ValueError("Parser Error (functionDeclaration): Expected FUNCTION, got token {}".format(repr(Parser.tokens.actual.value)))
         
-        return funcDec("FuncDec", [funcType, funcArguments, funcStatements])
-
-    @staticmethod
-    def subDeclaration():
-        subStatements = []
-        subArguments = []
-
-        if Parser.tokens.actual.type == "SUB":
-            Parser.tokens.selectNext()
-            if Parser.tokens.actual.type == "IDENTIFIER":
-                subIdentifier = Indentifier(Parser.tokens.actual.value)
-                Parser.tokens.selectNext()
-                if Parser.tokens.actual.value == "(":
-                    Parser.tokens.selectNext()
-
-                    while Parser.tokens.actual.type != ")":
-                        if Parser.tokens.actual.type == "IDENTIFIER":
-                            subArgName = Indentifier(Parser.tokens.actual.value)
-                            Parser.tokens.selectNext()
-                            if Parser.tokens.actual.type == "AS":
-                                Parser.tokens.selectNext()
-                                subArguments.append(VarDec("subArgDec", [subIdentifier, subArgName, Parser.parseType()]))
-
-                                if Parser.tokens.actual.type == "COMMA":
-                                    Parser.tokens.selectNext()
-                                else:
-                                    raise ValueError("Parser Error (subDeclaration): Expected a comma, got token {}".format(repr(Parser.tokens.actual.value)))
-                            else:
-                                raise ValueError("Parser Error (subDeclaration): Expected AS, got token {}".format(repr(Parser.tokens.actual.value)))
-
-                    if Parser.tokens.actual.value == ")":
-                        Parser.tokens.selectNext()
-                        if Parser.tokens.actual.type == "LINEFEED":
-                            Parser.tokens.selectNext()
-
-                            while Parser.tokens.actual.type != "END":
-                                statements.append(Parser.parseStatement())
-
-                                if Parser.tokens.actual.type == "LINEFEED":
-                                    Parser.tokens.selectNext()
-                            
-                            if Parser.tokens.actual.type == "END":
-                                Parser.tokens.selectNext()
-
-                                if Parser.tokens.actual.type == "SUB":
-                                    Parser.tokens.selectNext()
-                                else:
-                                    raise ValueError("Parser Error (subDeclaration): Expected SUB, got token {}".format(repr(Parser.tokens.actual.value)))
-                            else:
-                                raise ValueError("Parser Error (subDeclaration): Expected END, got token {}".format(repr(Parser.tokens.actual.value)))
-                        else:
-                            raise ValueError("Parser Error (subDeclaration): Expected '\n', got token {}".format(repr(Parser.tokens.actual.value)))
-                    else:
-                        raise ValueError("Parser Error (subDeclaration): Expected ), got token {}".format(repr(Parser.tokens.actual.value)))
-                else:
-                    raise ValueError("Parser Error (subDeclaration): Expected (, got token {}".format(repr(Parser.tokens.actual.value)))
-            else:
-                raise ValueError("Parser Error (subDeclaration): Expected an identifier, got token {}".format(repr(Parser.tokens.actual.value)))
-        else:
-            raise ValueError("Parser Error (subDeclaration): Expected SUB, got token {}".format(repr(Parser.tokens.actual.value)))
-        
-        return funcDec("SubDec", [subArguments, subStatements])
+        return FuncDec(funcIdentifier, funcType + funcArguments + [funcStatements])
 
     @staticmethod
     def parseStatement():
         if Parser.tokens.actual.type == "IDENTIFIER":
-            identifier = Indentifier(Parser.tokens.actual.value)
+            identifier = Identifier(Parser.tokens.actual.value)
             Parser.tokens.selectNext()
 
             if Parser.tokens.actual.type == "EQUAL":
@@ -235,7 +223,7 @@ class Parser:
             Parser.tokens.selectNext()
 
             if Parser.tokens.actual.type == "IDENTIFIER":
-                identifier = Indentifier(Parser.tokens.actual.value)
+                identifier = Identifier(Parser.tokens.actual.value)
                 Parser.tokens.selectNext()
 
                 if Parser.tokens.actual.type == "AS":
@@ -246,8 +234,54 @@ class Parser:
             else:
                 raise ValueError("Parser Error (Statement): Expected an IDENTIFIER, got token {}".format(repr(Parser.tokens.actual.value)))
 
+        elif Parser.tokens.actual.type == "CALL":
+            Parser.tokens.selectNext()
+
+            callArguments = []
+
+            if Parser.tokens.actual.type == "IDENTIFIER":
+                callIdentifier = Parser.tokens.actual.value
+                Parser.tokens.selectNext()
+                if Parser.tokens.actual.value == "(":
+                    Parser.tokens.selectNext()
+
+                    while Parser.tokens.actual.value != ")":
+                        callArguments.append(Parser.parseRelExpression())
+
+                        if Parser.tokens.actual.type == "COMMA":
+                            Parser.tokens.selectNext()
+                        
+                    if Parser.tokens.actual.value == ")":
+                        Parser.tokens.selectNext()
+                        return FuncCall(callIdentifier, callArguments)
+                    else:
+                        raise ValueError("Parser Error (Statement): Expected ), got token {}".format(repr(Parser.tokens.actual.value)))
+                else:
+                    raise ValueError("Parser Error (Statement): Expected (, got token {}".format(repr(Parser.tokens.actual.value)))
+            else:
+                raise ValueError("Parser Error (Statement): Expected an IDENTIFIER, got token {}".format(repr(Parser.tokens.actual.value)))
+
         else:
             return NoOp()
+
+    @staticmethod
+    def parseRelExpression():
+        output = Parser.parseExpression()
+
+        while Parser.tokens.actual.value in ["=", ">", "<"]:
+            if Parser.tokens.actual.value == "=":
+                Parser.tokens.selectNext()
+                output = BinOp("=", [output, Parser.parseExpression()])
+
+            elif Parser.tokens.actual.value == ">":
+                Parser.tokens.selectNext()
+                output = BinOp(">", [output, Parser.parseExpression()])
+
+            elif Parser.tokens.actual.value == "<":
+                Parser.tokens.selectNext()
+                output = BinOp("<", [output, Parser.parseExpression()])
+
+        return output
 
     @staticmethod
     def parseExpression():
@@ -294,8 +328,25 @@ class Parser:
             Parser.tokens.selectNext()
 
         elif Parser.tokens.actual.type == "IDENTIFIER":
-            output = Indentifier(Parser.tokens.actual.value)
+            identifier = Parser.tokens.actual.value
             Parser.tokens.selectNext()
+            if Parser.tokens.actual.value == "(":
+                Parser.tokens.selectNext()
+                callArguments = []
+
+                while Parser.tokens.actual.value != ")":
+                    callArguments.append(Parser.parseRelExpression())
+                    
+                    if Parser.tokens.actual.type == "COMMA":
+                        Parser.tokens.selectNext()
+
+                if Parser.tokens.actual.value == ")":
+                    Parser.tokens.selectNext()
+                    output = FuncCall(identifier, callArguments)
+                else:
+                    raise ValueError("Parser Error (subDeclaration): Expected ), got token {}".format(repr(Parser.tokens.actual.value)))
+            else:
+                output = Identifier(identifier)
 
         elif Parser.tokens.actual.type == "INPUT":
             output = Input("Input")
@@ -348,27 +399,27 @@ class Parser:
             raise ValueError("Parser Error (Type): Token {} type is not supported".format(repr(Parser.tokens.actual.type)))
 
     @staticmethod
-    def parseRelExpression():
-        output = Parser.parseExpression()
+    def parseProgram():
+        statements = []
+        while Parser.tokens.actual.type != "EOF":
+            if Parser.tokens.actual.type == "SUB":
+                statements.append(Parser.parseSubDec())
 
-        while Parser.tokens.actual.value in ["=", ">", "<"]:
-            if Parser.tokens.actual.value == "=":
+            elif Parser.tokens.actual.type == "FUNCTION":
+                statements.append(Parser.parseFuncDec())
+
+            elif Parser.tokens.actual.type == "LINEFEED":
                 Parser.tokens.selectNext()
-                output = BinOp("=", [output, Parser.parseExpression()])
-
-            elif Parser.tokens.actual.value == ">":
-                Parser.tokens.selectNext()
-                output = BinOp(">", [output, Parser.parseExpression()])
-
-            elif Parser.tokens.actual.value == "<":
-                Parser.tokens.selectNext()
-                output = BinOp("<", [output, Parser.parseExpression()])
-
-        return output
+                
+            else:
+                raise ValueError("Parser Error (program): Expected a SUB, FUNCTION or EOF, got token {}".format(repr(Parser.tokens.actual.value)))
+        
+        statements.append(FuncCall("MAIN", []))
+        return Program("Program", statements)
 
     @staticmethod
     def run(code):
-        st = SymbolTable()
+        st = SymbolTable(None)
         Parser.tokens = Tokenizer(PrePro.filtra(code))
         Parser.tokens.selectNext()
         res = Parser.parseProgram()
