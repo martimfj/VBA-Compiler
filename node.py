@@ -140,34 +140,36 @@ class SubDec(Node):
 
 class FuncCall(Node):
     def evaluate(self, st):
-        st = SymbolTable(st)
-        decFunc, decFunc_type = st.getter(self.value)
+        new_st = SymbolTable(st)
+        decFunc, decFunc_type = new_st.getter(self.value)
 
         if decFunc_type == "SUB":
             if len(decFunc.children[:-1]) == len(self.children):
                 for decVar, callVar in zip(decFunc.children[:-1], self.children):
-                    decVar.evaluate(st)
-                    st.setter(decVar.children[0].value, callVar.evaluate(st)[0])
+                    decVar.evaluate(new_st)
+                    new_st.setter(decVar.children[0].value, callVar.evaluate(new_st)[0])
             else:
                 raise ValueError("AST Error (FuncCall): Expected {} arguments. got {}".format(len(decFunc.children[:-1]), len(self.children)))
 
             for statement in decFunc.children[-1]:
-                statement.evaluate(st)
+                statement.evaluate(new_st)
 
         elif decFunc_type == "FUNCTION":
             if len(decFunc.children[1:-1]) == len(self.children):
-                decFunc.children[0].evaluate(st)
+                decFunc.children[0].evaluate(new_st)
                 for decVar, callVar in zip(decFunc.children[1:-1], self.children):
-                    decVar.evaluate(st)
-                    st.setter(decVar.children[0].value, callVar.evaluate(st)[0])
-
+                    if decVar.children[1].value == callVar.evaluate(new_st)[1]:
+                        decVar.evaluate(new_st)
+                        new_st.setter(decVar.children[0].value, callVar.evaluate(new_st)[0])
+                    else:
+                        raise ValueError("AST Error (FuncCall): Type mismatch: {} argument {} type is {}, got {}".format(decFunc.value, decVar.children[0].value, decVar.children[1].value, callVar.evaluate(new_st)[1]))
             else:
-                raise ValueError("AST Error (FuncCall): Expected {} arguments. got {}".format(len(decFunc.children[:-1]), len(self.children)))
+                raise ValueError("AST Error (FuncCall): Expected {} arguments. got {}".format(len(decFunc.children[1:-1]), len(self.children)))
 
             for statement in decFunc.children[-1]:
-                statement.evaluate(st)
+                statement.evaluate(new_st)
             
-            return st.getter(decFunc.children[0].children[0].value)
+            return new_st.getter(decFunc.children[0].children[0].value)
 
 class NoOp(Node):
     def evaluate(self, st):

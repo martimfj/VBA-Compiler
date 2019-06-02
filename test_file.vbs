@@ -1,18 +1,42 @@
-Function Soma(x as Integer, y as Integer) as Integer
-    Dim a as Integer
-    print c
-    a = x + y
-    Print a
-    Soma = a
-End Function
+Sub main()
+    ' adaptado da sabrina
 
-Sub Main()
-    Dim a as Integer
-    Dim b as Integer
-    Dim c as Integer
-    c = 10
-    a = 3
-    b = Soma(a, 4)
-    Print a
-    Print b
-End Sub
+    dim fizz as integer
+    dim buzz as integer
+    dim fizzbuzz as integer
+    dim n as integer
+    dim tres as integer
+    dim cinco as integer
+    dim flag as boolean
+
+    n = INPUT
+    fizz = 0000
+    buzz = 1111
+    fizzbuzz = 00001111
+    flag = True
+
+    while n > 0
+        tres = (n - (n / 3 * 3))
+        cinco = (n - (n / 5 * 5))
+
+        print n
+
+        if (tres = 0) and (cinco = 0) then
+            print fizzbuzz
+            flag = False
+        end if
+
+        if (tres = 0) and (flag = True) then
+            print fizz
+            flag = False
+        end if
+
+        if (cinco = 0) and (flag = True) then
+            print buzz
+            flag = False
+        end if
+
+        flag = True
+        n = n - 1
+    wend
+end sub

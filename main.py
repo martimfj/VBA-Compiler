@@ -7,10 +7,10 @@ import sys
 
 def main():
     try:
-        filename = "test_file.vbs" #sys.argv[1]
+        filename = sys.argv[1]
     except IndexError:
-        print("This program needs an input .vbs file to continue. Exiting...")
-        sys.exit(1)
+        print("This program accepts a .vbs file as input. Running test_file.vbs...")
+        filename = "test_file.vbs"
 
     with open (filename, 'r') as file:
         code = file.read()
